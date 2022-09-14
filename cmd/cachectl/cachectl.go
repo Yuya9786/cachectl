@@ -18,6 +18,7 @@ func main() {
 	filter := flag.String("filter", "*", "filter pattern")
 	rate := flag.Float64("r", 1.0, "rate of page cache purged(0.0 <= r <= 1.0)")
 	verbose := flag.Bool("verbose", false, "verbose mode")
+	fsort := flag.Bool("filesize-sort", false, "filesize sort")
 	flag.Parse()
 
 	if *version {
@@ -55,9 +56,16 @@ func main() {
 
 	if *op == "stat" {
 		if fi.IsDir() {
-			err := cachectl.WalkPrintPagesStat(*fpath, re)
-			if err != nil {
-				log.Fatalf("failed to walk in %s.", fi.Name())
+			if *fsort {
+				err := cachectl.FsortPrintPagesStat(*fpath, re)
+				if err != nil {
+					log.Fatalf("failed to walk in %s.", fi.Name())
+				}
+			} else {
+				err := cachectl.WalkPrintPagesStat(*fpath, re)
+				if err != nil {
+					log.Fatalf("failed to walk in %s.", fi.Name())
+				}
 			}
 		} else {
 			if !fi.Mode().IsRegular() {
